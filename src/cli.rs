@@ -1,7 +1,7 @@
 use clap::{Args, Parser, Subcommand};
 
-pub const KNOWN_COMMANDS: [&str; 7] = [
-    "download", "analyze", "search", "list", "info", "config", "version",
+pub const KNOWN_COMMANDS: [&str; 8] = [
+    "download", "analyze", "search", "list", "info", "config", "update", "version",
 ];
 
 #[derive(Parser, Debug)]
@@ -79,8 +79,25 @@ pub enum Command {
     Info(InfoArgs),
     /// Show or edit configuration
     Config(ConfigArgs),
+    /// Update hfd to the latest release
+    Update(UpdateArgs),
     /// Show version information
     Version,
+}
+
+#[derive(Args, Debug)]
+pub struct UpdateArgs {
+    /// Only check for an update, do not install it
+    #[arg(long)]
+    pub check: bool,
+
+    /// Reinstall even when the version matches (or is newer)
+    #[arg(long)]
+    pub force: bool,
+
+    /// Install a specific release tag (e.g. v0.1.0)
+    #[arg(long = "tag", value_name = "TAG")]
+    pub tag: Option<String>,
 }
 
 #[derive(Args, Debug)]

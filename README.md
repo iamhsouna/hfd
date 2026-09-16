@@ -38,15 +38,54 @@ Files land in `~/models/<org>/<repo>/...` as plain, ready-to-use files.
 
 ## Install
 
+### One-liner (recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/iamhsouna/hfd/master/install.sh | bash
+```
+
+The installer detects your OS and architecture, installs the required
+dependencies, and puts `hfd` on your `PATH` (in `~/.local/bin` by default).
+It works on macOS, Ubuntu/Debian, Arch Linux, Fedora, and openSUSE.
+
+It prefers a prebuilt release binary and automatically falls back to building
+from source if none is available for your platform.
+
+```bash
+# Build from source instead
+curl -fsSL .../install.sh | bash -s -- --from-source
+
+# Choose the install directory
+curl -fsSL .../install.sh | bash -s -- --bin-dir /usr/local/bin
+
+# Pin a release
+curl -fsSL .../install.sh | bash -s -- --version v0.1.0
+```
+
+Installer flags: `--from-source`, `--version TAG`, `--bin-dir DIR`,
+`--no-modify-path`, `--no-deps`, `--help`.
+
 ### From source
 
 ```bash
-git clone <this repo> && cd hfd
+git clone https://github.com/iamhsouna/hfd && cd hfd
 cargo build --release
-install -m 755 target/release/hfd ~/.local/bin/hfd   # or /usr/local/bin
+install -m 755 target/release/hfd ~/.local/bin/hfd
 ```
 
 Requirements: a recent stable Rust toolchain.
+
+### Update
+
+```bash
+hfd update            # update to the latest release
+hfd update --check    # only check, do not install
+hfd update --tag v0.1.0
+```
+
+`hfd update` downloads the matching prebuilt binary from GitHub Releases,
+verifies its checksum when available, and atomically replaces the running
+executable.
 
 ---
 
@@ -88,6 +127,7 @@ hfd search "code llama" -l 10
 | `list` | List everything downloaded under the output directory |
 | `info` | Show details of a downloaded repository |
 | `config` | Show, edit, or locate the configuration file |
+| `update` | Update hfd to the latest release (`--check`, `--force`, `--tag`) |
 | `version` | Show version information |
 
 ## Global options

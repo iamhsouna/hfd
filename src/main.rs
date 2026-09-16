@@ -6,6 +6,7 @@ mod download;
 mod progress;
 mod store;
 mod tui;
+mod update;
 mod util;
 
 use anyhow::Result;
@@ -27,6 +28,14 @@ async fn main() -> Result<()> {
         Some(Command::List(args)) => commands::list(&settings, &args).await,
         Some(Command::Info(args)) => commands::info(&settings, &args).await,
         Some(Command::Config(args)) => commands::config_cmd(&args),
+        Some(Command::Update(args)) => {
+            update::run(update::UpdateOptions {
+                check_only: args.check,
+                force: args.force,
+                version: args.tag.clone(),
+            })
+            .await
+        }
         Some(Command::Version) => {
             println!("hfd {}", env!("CARGO_PKG_VERSION"));
             Ok(())
