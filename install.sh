@@ -364,9 +364,12 @@ update_path
 
 printf '\n'
 ok "hfd installed successfully"
+printf '  binary : %s\n' "$BIN_DIR/$BIN_NAME"
 if have "$BIN_NAME"; then
-  "$BIN_NAME" --version || true
+  printf '  try    : %s\n' "hfd --help"
 else
-  printf '  Run: %s/%s --version\n' "$BIN_DIR" "$BIN_NAME"
+  warn "hfd is not on your PATH in this shell yet"
+  printf '  run    : %s/%s --help\n' "$BIN_DIR" "$BIN_NAME"
+  printf '  or add : export PATH="%s:$PATH"\n' "$BIN_DIR"
 fi
-printf '  Update later with: %s\n' "hfd update"
+printf '  update : %s\n' "hfd update"
