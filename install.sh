@@ -111,6 +111,23 @@ fi
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+# Run a command as root. Never let sudo read from stdin, which may be the
+# installer script itself when invoked through `curl ... | bash`.
+run_root() {
+  if [ -z "$SUDO" ]; then
+    if [ "$(id -u)" -ne 0 ]; then
+      die "root privileges are required; install sudo or re-run as root"
+    fi
+    "$@"
+  elif [ -t 0 ]; then
+    "$SUDO" "$@"
+  elif [ -r /dev/tty ]; then
+    "$SUDO" "$@" < /dev/tty
+  else
+    "$SUDO" -n "$@"
+  fi
+}
+
 # ------------------------------------------------------------ dependencies --
 
 install_deps() {
@@ -123,47 +140,51 @@ install_deps() {
 
   case "$PLATFORM" in
     macos)
+      # macOS ships curl and git (via the Xcode Command Line Tools). We never
+      # invoke Homebrew here: it can block on interactive auto-updates.
       if ! have curl; then
-        die "curl is required; install it with: brew install curl"
+        die "curl is required but was not found. Install it with: xcode-select --install"
       fi
-      if have brew; then
-        brew list git >/dev/null 2>&1 || brew install git >/dev/null 2>&1 || true
-      fi
-      if [ "$FROM_SOURCE" -eq 1 ] && ! xcode-select -p >/dev/null 2>&1; then
-        warn "Xcode Command Line Tools are required to build from source."
-        warn "Run: xcode-select --install   then re-run this installer."
-        die "missing command line tools"
+      if [ "$FROM_SOURCE" -eq 1 ]; then
+        if ! xcode-select -p >/dev/null 2>&1; then
+          warn "Xcode Command Line Tools are required to build from source."
+          warn "Run: xcode-select --install   then re-run this installer."
+          die "missing Xcode Command Line Tools"
+        fi
+        if ! have git; then
+          die "git is required to build from source. Run: xcode-select --install"
+        fi
       fi
       ;;
     linux)
       case "$DISTRO_ID $DISTRO_LIKE" in
         *arch*)
-          $SUDO pacman -Sy --needed --noconfirm base-devel curl git ca-certificates >/dev/null
+          run_root pacman -Sy --needed --noconfirm base-devel curl git ca-certificates >/dev/null
           ;;
         *ubuntu*|*debian*|*mint*|*pop*)
-          $SUDO apt-get update -y >/dev/null
-          $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+          run_root apt-get update -y >/dev/null
+          run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             curl git ca-certificates \
             build-essential pkg-config >/dev/null
           ;;
         *fedora*|*rhel*|*centos*)
-          $SUDO dnf install -y curl git ca-certificates \
+          run_root dnf install -y curl git ca-certificates \
             gcc gcc-c++ make pkgconf-pkg-config >/dev/null
           ;;
         *suse*)
-          $SUDO zypper --non-interactive install curl git ca-certificates \
+          run_root zypper --non-interactive install curl git ca-certificates \
             gcc gcc-c++ make pkg-config >/dev/null
           ;;
         *alpine*)
-          $SUDO apk add --no-cache curl git ca-certificates build-base >/dev/null
+          run_root apk add --no-cache curl git ca-certificates build-base >/dev/null
           ;;
         *)
           if have apt-get; then
-            $SUDO apt-get update -y >/dev/null
-            $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            run_root apt-get update -y >/dev/null
+            run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
               curl git ca-certificates build-essential pkg-config >/dev/null
           elif have pacman; then
-            $SUDO pacman -Sy --needed --noconfirm base-devel curl git ca-certificates >/dev/null
+            run_root pacman -Sy --needed --noconfirm base-devel curl git ca-certificates >/dev/null
           else
             warn "unknown distribution — please ensure curl, git and a C toolchain are installed"
           fi
@@ -223,12 +244,12 @@ install_to() {
   if [ -w "$dir" ] || [ ! -e "$dir" ]; then
     mkdir -p "$dir"
     if [ -e "$target" ] && [ ! -w "$target" ]; then
-      $SUDO install -m 0755 "$src" "$target"
+      run_root install -m 0755 "$src" "$target"
     else
       install -m 0755 "$src" "$target"
     fi
   else
-    $SUDO install -m 0755 "$src" "$target"
+    run_root install -m 0755 "$src" "$target"
   fi
   printf '%s' "$target"
 }
