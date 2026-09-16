@@ -209,7 +209,12 @@ resolve_tag() {
 
 download() {
   local url="$1" dest="$2"
-  curl -fL --retry 3 --connect-timeout 20 --proto '=https' -o "$dest" "$url"
+  local -a opts=(-fL --retry 3 --connect-timeout 20 --proto '=https')
+  if [ -t 2 ]; then
+    curl "${opts[@]}" --progress-bar -o "$dest" "$url"
+  else
+    curl "${opts[@]}" -sS -o "$dest" "$url"
+  fi
 }
 
 install_to() {
