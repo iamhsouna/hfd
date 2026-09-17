@@ -95,6 +95,13 @@ executable.
 # Download a whole model (default command)
 hfd sshleifer/tiny-gpt2
 
+# Download just one file (exact name, or any part of the path)
+hfd download ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf
+
+# Or with an include pattern (-F matches any part of the path)
+hfd download owner/repo -F q4_k_m
+hfd download owner/repo -F IQ3_S-mtp.gguf
+
 # Pick a quantization interactively
 hfd analyze -i TheBloke/Mistral-7B-Instruct-v0.2-GGUF
 

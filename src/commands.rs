@@ -66,7 +66,12 @@ pub async fn download(settings: &Settings, args: &DownloadArgs) -> Result<()> {
     let info = client.tree(repo_type, &repo, &settings.revision).await?;
 
     let filter = crate::api::Filter {
-        include: args.filter.clone(),
+        include: args
+            .filter
+            .iter()
+            .chain(args.files.iter())
+            .cloned()
+            .collect(),
         exclude: args.exclude.clone(),
         quants,
     };
@@ -78,7 +83,13 @@ pub async fn download(settings: &Settings, args: &DownloadArgs) -> Result<()> {
         .collect();
 
     if files.is_empty() {
-        bail!("no files in {repo} matched the given filters");
+        if args.files.is_empty() {
+            bail!("no files in {repo} matched the given filters");
+        }
+        bail!(
+            "no files in {repo} matched: {}. Run `hfd analyze {repo}` to list files",
+            args.files.join(", ")
+        );
     }
 
     if args.dry_run {

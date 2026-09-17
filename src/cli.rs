@@ -106,6 +106,10 @@ pub struct DownloadArgs {
     #[arg(value_name = "REPO[:QUANT]")]
     pub source: String,
 
+    /// One or more files to download (exact path, or part of the path)
+    #[arg(value_name = "FILE")]
+    pub files: Vec<String>,
+
     /// Only download files whose path contains one of these patterns
     #[arg(
         short = 'F',
