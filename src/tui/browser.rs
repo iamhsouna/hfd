@@ -564,7 +564,7 @@ impl Browser {
         frame.render_widget(
             Paragraph::new(Line::from(Span::styled(
                 footer,
-                Style::new().fg(Color::DarkGray),
+                Style::new().fg(Color::Gray),
             ))),
             layout[2],
         );

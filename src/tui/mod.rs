@@ -1,6 +1,7 @@
 pub mod app;
 pub mod browser;
 pub mod picker;
+pub mod speedo;
 pub mod ui;
 
 use std::io::IsTerminal;

@@ -26,7 +26,8 @@ Files land in `~/models/<org>/<repo>/...` as plain, ready-to-use files.
 - **Integrity by default available** — stream SHA-256 verification against the
   LFS object hash with `--verify`.
 - **Best-in-class TUI** — live overall gauge, per-file bars, speed, ETA, a
-  navigable detail pane with a speed sparkline, pause/resume and cancel.
+  navigable detail pane with a Mercedes-style radial speedometer, pause/resume
+  and cancel.
 - **Interactive GGUF picker** — quality stars, RAM estimates, a “recommended”
   badge (Q4_K_M), multi-select, and one keystroke to download.
 - **Datasets too** — full support for `datasets/` repositories.

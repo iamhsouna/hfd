@@ -191,7 +191,7 @@ fn draw_details(frame: &mut Frame, app: &App, area: Rect) {
 
     let rows = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(6), Constraint::Length(5)])
+        .constraints([Constraint::Min(5), Constraint::Length(9)])
         .split(inner);
 
     let Some(file) = app.hub.files.get(app.selected()) else {
@@ -231,15 +231,21 @@ fn draw_details(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(Paragraph::new(lines).wrap(Wrap { trim: true }), rows[0]);
 
     let history: Vec<u64> = file.history.lock().unwrap().iter().copied().collect();
-    let sparkline = Sparkline::default()
-        .block(
-            Block::new()
-                .title(" speed ")
-                .title_style(Style::new().fg(Color::DarkGray)),
-        )
-        .data(history)
-        .style(Style::new().fg(Color::Cyan));
-    frame.render_widget(sparkline, rows[1]);
+    let gauge_area = rows[1];
+    let gauge_block = Block::bordered()
+        .title(" speedometer ")
+        .border_style(Style::new().fg(Color::DarkGray));
+    let gauge_inner = gauge_block.inner(gauge_area);
+    frame.render_widget(gauge_block, gauge_area);
+    frame.render_widget(
+        super::speedo::Speedometer {
+            speed,
+            history: &history,
+            average,
+            paused: app.hub.is_paused(),
+        },
+        gauge_inner,
+    );
 }
 
 fn draw_footer(frame: &mut Frame, app: &App, area: Rect) {
@@ -250,19 +256,26 @@ fn draw_footer(frame: &mut Frame, app: &App, area: Rect) {
             Style::new().fg(Color::Yellow).bold(),
         ))
     } else {
+        let key = |text: &'static str| {
+            Span::styled(
+                format!(" {text} "),
+                Style::new().fg(Color::Black).bg(Color::Cyan).bold(),
+            )
+        };
+        let desc = |text: &'static str| Span::styled(text, Style::new().fg(Color::Gray));
         Line::from(vec![
-            Span::styled(" q", key_style()),
-            Span::raw(" quit  "),
-            Span::styled("p", key_style()),
-            Span::raw(" pause/resume  "),
-            Span::styled("↑/↓", key_style()),
-            Span::raw(" select  "),
-            Span::styled("c", key_style()),
-            Span::raw(" cancel  "),
-            Span::styled("o", key_style()),
-            Span::raw(" open folder  "),
-            Span::styled("?", key_style()),
-            Span::raw(" help"),
+            key("q"),
+            desc(" quit  "),
+            key("p"),
+            desc(" pause/resume  "),
+            key("↑/↓"),
+            desc(" select  "),
+            key("c"),
+            desc(" cancel  "),
+            key("o"),
+            desc(" open folder  "),
+            key("?"),
+            desc(" help"),
         ])
     };
     frame.render_widget(Paragraph::new(line), area);
@@ -317,10 +330,6 @@ fn help_line(key: &str, description: &str) -> Line<'static> {
         ),
         Span::raw(description.to_string()),
     ])
-}
-
-fn key_style() -> Style {
-    Style::new().fg(Color::Black).bg(Color::DarkGray).bold()
 }
 
 fn phase_label(phase: &Phase) -> &'static str {
