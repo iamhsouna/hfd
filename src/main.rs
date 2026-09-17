@@ -28,6 +28,7 @@ async fn main() -> Result<()> {
         Some(Command::List(args)) => commands::list(&settings, &args).await,
         Some(Command::Info(args)) => commands::info(&settings, &args).await,
         Some(Command::Config(args)) => commands::config_cmd(&args),
+        Some(Command::Tui(args)) => commands::tui(&settings, &args).await,
         Some(Command::Update(args)) => {
             update::run(update::UpdateOptions {
                 check_only: args.check,

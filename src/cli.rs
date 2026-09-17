@@ -1,7 +1,7 @@
 use clap::{Args, Parser, Subcommand};
 
-pub const KNOWN_COMMANDS: [&str; 8] = [
-    "download", "analyze", "search", "list", "info", "config", "update", "version",
+pub const KNOWN_COMMANDS: [&str; 9] = [
+    "download", "analyze", "search", "list", "info", "config", "update", "tui", "version",
 ];
 
 #[derive(Parser, Debug)]
@@ -79,10 +79,23 @@ pub enum Command {
     Info(InfoArgs),
     /// Show or edit configuration
     Config(ConfigArgs),
+    /// Open the interactive browser (search, pick files, download, browse local)
+    Tui(TuiArgs),
     /// Update hfd to the latest release
     Update(UpdateArgs),
     /// Show version information
     Version,
+}
+
+#[derive(Args, Debug)]
+pub struct TuiArgs {
+    /// Optional search query or org/name to open directly
+    #[arg(value_name = "QUERY")]
+    pub query: Option<String>,
+
+    /// Search datasets instead of models
+    #[arg(long)]
+    pub dataset: bool,
 }
 
 #[derive(Args, Debug)]

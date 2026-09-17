@@ -124,6 +124,29 @@ hfd download squad --dataset
 hfd search "code llama" -l 10
 ```
 
+## Interactive browser
+
+```bash
+hfd tui                     # home menu: search, browse local, quit
+hfd tui "qwen gguf"         # start with a search
+hfd tui Qwen/Qwen2.5-7B-GGUF  # open a repository directly
+hfd tui --dataset squad     # search datasets
+```
+
+The browser lets you search the Hub, open a repository, pick exactly which
+files or quantizations to download (with quality stars and RAM estimates),
+watch the live transfer dashboard, and browse everything already downloaded
+locally — all without leaving the terminal.
+
+| Screen | Keys |
+| --- | --- |
+| Home | `↑/↓` move, `Enter` select, `q` quit |
+| Search | type a query or `org/name`, `Enter` search/open, `Ctrl-T` models/datasets, `↓` into results |
+| Results | `↑/↓` move, `Enter` open repository, `Esc` back to input |
+| Files | `Space` select, `a` all, `n` none, `Enter` download, `o` open folder, `Esc` back |
+| Download | `p` pause/resume, `c` cancel, `?` help, `q` back |
+| Local | `↑/↓` move, `Enter` details, `o` open folder, `Esc` back |
+
 ## Commands
 
 | Command | Description |
@@ -134,6 +157,7 @@ hfd search "code llama" -l 10
 | `list` | List everything downloaded under the output directory |
 | `info` | Show details of a downloaded repository |
 | `config` | Show, edit, or locate the configuration file |
+| `tui` | Open the interactive browser (search, pick files, download, browse local) |
 | `update` | Update hfd to the latest release (`--check`, `--force`, `--tag`) |
 | `version` | Show version information |
 

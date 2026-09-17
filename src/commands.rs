@@ -1,3 +1,4 @@
+use std::io::IsTerminal;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -9,6 +10,7 @@ use tokio_util::sync::CancellationToken;
 use crate::api::{HfClient, RemoteFile, RepoInfo};
 use crate::cli::{
     AnalyzeArgs, Cli, ConfigAction, ConfigArgs, DownloadArgs, InfoArgs, ListArgs, SearchArgs,
+    TuiArgs,
 };
 use crate::config::{self, Config};
 use crate::download::{self, DownloadPlan, RunConfig};
@@ -17,6 +19,7 @@ use crate::store;
 use crate::tui::{self, App, picker::PickItem};
 use crate::util;
 
+#[derive(Clone)]
 pub struct Settings {
     pub output_root: PathBuf,
     pub endpoint: String,
@@ -166,6 +169,14 @@ pub async fn analyze(settings: &Settings, args: &AnalyzeArgs) -> Result<()> {
     let files: Vec<RemoteFile> = selection.iter().map(|index| gguf[*index].clone()).collect();
     let command = std::env::args().collect::<Vec<_>>().join(" ");
     execute(settings, client, &info, files, command, false).await
+}
+
+pub async fn tui(settings: &Settings, args: &TuiArgs) -> Result<()> {
+    if !std::io::stdout().is_terminal() {
+        bail!("the interactive browser needs a terminal (try without piping)");
+    }
+    let client = settings.client()?;
+    crate::tui::browser::run(client, settings.clone(), args.query.clone(), args.dataset).await
 }
 
 pub async fn search(settings: &Settings, args: &SearchArgs) -> Result<()> {
